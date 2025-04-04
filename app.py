@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from io import BytesIO
+from io import StringIO, BytesIO
 from fpdf import FPDF
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -149,9 +149,10 @@ if uploaded_file:
             st.dataframe(df.head())
 
             st.write("### Dataset Information")
-            buffer = BytesIO()
+            buffer = StringIO()
             df.info(buf=buffer)
-            st.text(buffer.getvalue().decode())
+            info_str = buffer.getvalue()
+            st.text(info_str)
 
             st.write("### Summary Statistics")
             summary_stats = df.describe()
