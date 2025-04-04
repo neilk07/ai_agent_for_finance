@@ -26,13 +26,6 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
     st.write("### Preview of Dataset", df.head())
 
-    # Option 1: Fill NaN values with column mean
-    # df = df.fillna(df.select_dtypes(include=[np.number]).mean())
-
-
-    # Option 2: Drop rows with NaN values
-    df = df.dropna()
-
     # Summary statistics
     summary = df.describe().to_string()
     missing = df.isnull().sum().to_string()
@@ -40,10 +33,15 @@ if uploaded_file:
     st.write("### Missing Values")
     st.text(missing)
 
-    # Correlation heatmap
+    # Correlation heatmap with cleaning
     st.write("### Correlation Heatmap")
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.heatmap(df.corr(numeric_only=True), annot=True, cmap='coolwarm', ax=ax)
+    numeric_df = df.select_dtypes(include=[np.number]).dropna(axis=1, how='any')
+    corr_matrix = numeric_df.corr()
+    if not corr_matrix.empty:
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
+    else:
+        st.warning("Correlation heatmap could not be generated. No complete numeric columns found without NaNs.")
     st.pyplot(fig)
 
     # Line chart
@@ -141,18 +139,6 @@ if uploaded_file:
     st.write("### 🤖 AI Insights (Free Simulated)")
     st.text(insights)
 
-    # Example (Gemini or DeepSeek API - pseudo code)
-    #import requests
-
-
-    #def call_llm(prompt):
-    #    api_key = st.secrets["API_KEY"]  # Add in Streamlit secrets
-    #    headers = {"Authorization": f"Bearer {api_key}"}
-    #    payload = {"prompt": prompt, "model": "gemini-pro"}  # Or "deepseek-chat"
-    #    response = requests.post("https://api.your-llm-provider.com/v1/chat", headers=headers, json=payload)
-    #   return response.json().get("content")
-
-
     # Export PDF with charts and tables
     def create_pdf(summary, missing, insights):
         pdf = FPDF()
@@ -165,12 +151,14 @@ if uploaded_file:
 
         # Save basic correlation heatmap to image
         plt.figure(figsize=(8, 6))
-        sns.heatmap(df.corr(numeric_only=True), annot=True, cmap='coolwarm')
-        heatmap_img = BytesIO()
-        plt.savefig(heatmap_img, format='png')
-        plt.close()
-        heatmap_img.seek(0)
-        pdf.image(heatmap_img, x=10, y=None, w=180)
+        cleaned_corr = df.select_dtypes(include=[np.number]).dropna(axis=1, how='any').corr()
+        if not cleaned_corr.empty:
+            sns.heatmap(cleaned_corr, annot=True, cmap='coolwarm')
+            heatmap_img = BytesIO()
+            plt.savefig(heatmap_img, format='png')
+            plt.close()
+            heatmap_img.seek(0)
+            pdf.image(heatmap_img, x=10, y=None, w=180)
 
         # Summary table as image
         fig, ax = plt.subplots(figsize=(8, 4))
