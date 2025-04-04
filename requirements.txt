@@ -1,7 +1,11 @@
+# requirements.txt
 streamlit
 pandas
 matplotlib
 seaborn
 fpdf
 numpy
+fpdf2
 scikit-learn
+statsmodels
+
