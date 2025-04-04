@@ -165,14 +165,14 @@ if uploaded_file:
                         df = df.dropna()
                         st.write(f"Shape after dropping NaNs: {df.shape}")
                     elif impute_method == "Fill with Mean (Numeric)":
-                        numeric_cols_na = df.select_dtypes(include=np.number).isnull().any()
-                        cols_to_impute = numeric_cols_na[numeric_cols_na].index
+                        numeric_cols_na = df.select_dtypes(include=np.number).columns
+                        cols_to_impute = [col for col in numeric_cols_na if df[col].isnull().any()]
                         for col in cols_to_impute:
                             df[col] = df[col].fillna(df[col].mean())
                         st.write("Numeric columns filled with mean.")
                     elif impute_method == "Fill with Median (Numeric)":
-                        numeric_cols_na = df.select_dtypes(include=np.number).isnull().any()
-                        cols_to_impute = numeric_cols_na[numeric_cols_na].index
+                        numeric_cols_na = df.select_dtypes(include=np.number).columns
+                        cols_to_impute = [col for col in numeric_cols_na if df[col].isnull().any()]
                         for col in cols_to_impute:
                             df[col] = df[col].fillna(df[col].median())
                         st.write("Numeric columns filled with median.")
@@ -222,7 +222,7 @@ if uploaded_file:
                 try:
                     df_ts = df.set_index(date_col).copy()
                     st.success(f"'{date_col}' set as time series index.")
-                    numeric.ConcurrentModificationExceptionols_ts = df_ts.select_dtypes(include=np.number).columns.tolist()
+                    numeric_cols_ts = df_ts.select_dtypes(include=np.number).columns.tolist()
                     st.session_state.analysis_results['time_series_plots'] = {}
 
                     if numeric_cols_ts:
@@ -254,7 +254,7 @@ if uploaded_file:
                         decomp_col = st.selectbox("Select column for decomposition", numeric_cols_ts, key='decomp_sel')
                         inferred_freq = pd.infer_freq(df_ts.index)
                         period = st.number_input("Seasonality Period (e.g., 7 for daily data/weekly seasonality, 12 for monthly/yearly)",
-                                                 value=7 if inferred_freq == 'D' else (12 if inferred_freq and 'M' in inferred_freq else 1))
+                                                value=7 if inferred_freq == 'D' else (12 if inferred_freq and 'M' in inferred_freq else 1))
                         if decomp_col and period > 1:
                             try:
                                 if len(df_ts[decomp_col].dropna()) > 2 * period:
