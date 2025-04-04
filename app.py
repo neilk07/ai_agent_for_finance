@@ -27,10 +27,11 @@ if uploaded_file:
     st.write("### Preview of Dataset", df.head())
 
     # Option 1: Fill NaN values with column mean
-    df = df.fillna(df.mean())
+    # df = df.fillna(df.select_dtypes(include=[np.number]).mean())
+
 
     # Option 2: Drop rows with NaN values
-    # df = df.dropna()
+    df = df.dropna()
 
     # Summary statistics
     summary = df.describe().to_string()
