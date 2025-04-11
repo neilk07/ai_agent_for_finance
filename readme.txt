@@ -1,4 +1,4 @@
-# 📊 AI-Powered Financial Analyst Pro
+# 📊 AI-Powered Financial Analyst
 
 A Streamlit web application designed for comprehensive financial data analysis, visualization, time series forecasting, classification, and reporting.
 
